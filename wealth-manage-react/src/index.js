@@ -11,16 +11,14 @@ import './index.css';
 
 const root = createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <HashRouter>
-      <Routes>
-        <Route path='*' element={<App />} />
-        <Route path='/payout' element={<Payout />} />
-        <Route path='/collection' element={<Collection />} />
-        <Route path='/notes' element={<Notes />} />
-        <Route path='/setting' element={<Setting />} />
-        <Route path='/help' element={<Help />} />
-      </Routes>
-    </HashRouter>
-  </React.StrictMode>
+  <HashRouter>
+    <Routes>
+      <Route path='*' element={<App />} />
+      <Route path='/payout' element={<Payout />} />
+      <Route path='/collection' element={<Collection />} />
+      <Route path='/notes' element={<Notes />} />
+      <Route path='/setting' element={<Setting />} />
+      <Route path='/help' element={<Help />} />
+    </Routes>
+  </HashRouter>
 );

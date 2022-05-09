@@ -7,11 +7,23 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import HelpIcon from '@mui/icons-material/Help';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 function App() {
   const navigate = useNavigate()
   function quit() {
   }
+  // 创建数据库，创建数据对象
+  useEffect(() => {
+    let request = indexedDB.open('wealth')
+    request.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore('payout', { keyPath: 'timeStamp' })
+      e.target.result.createObjectStore('collection', { keyPath: 'timeStamp' })
+      e.target.result.createObjectStore('notes', { keyPath: 'timeStamp' })
+      console.log("数据库创建成功")
+      e.target.result.close()
+    }
+  }, [])
   return (
     <div>
       <h1>开始</h1>
