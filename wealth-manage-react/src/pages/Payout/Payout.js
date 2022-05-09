@@ -1,18 +1,20 @@
 import './Payout.css';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab, FormControl, InputLabel, List, ListItem, ListItemButton, ListItemText, MenuItem, Select, TextField } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Fab, InputLabel, List, ListItem, ListItemButton, ListItemText, MenuItem, Select, TextField } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 const Payout = () => {
   const [open, setOpen] = useState(false)
-  const [money, setMoney] = useState(0)
+  const [money, setMoney] = useState('')
   const [type, setType] = useState('')
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
   const [timeStamp, setTimeStamp] = useState(null)
-  const [payouts, setPayouts] = useState(null)
+  const [payouts, setPayouts] = useState([{ empty: true }])
   const [db, setDB] = useState(null)
+  const navigate = useNavigate()
 
   function db_put() {
     let request = db.transaction(['payout'], 'readwrite')
@@ -21,7 +23,19 @@ const Payout = () => {
 
     request.onsuccess = () => {
       setOpen(false)
-      window.location.reload()
+      setPayouts((prev) => {
+        let arr = [...prev], i = 0
+        for (; i < prev.length; i++) {
+          if (prev[i].timeStamp === timeStamp) {
+            arr.splice(i, 1, { type, money, date, note, timeStamp })
+            break
+          }
+        }
+        if (i === prev.length) {
+          arr.push({ type, money, date, note, timeStamp })
+        }
+        return arr
+      })
     }
   }
 
@@ -36,6 +50,10 @@ const Payout = () => {
 
   function handleAdd() {
     setOpen(true)
+    setMoney(0)
+    setType('')
+    setDate('')
+    setNote('')
     setTimeStamp(new Date())
   }
 
@@ -46,7 +64,20 @@ const Payout = () => {
 
     request.onsuccess = () => {
       setOpen(false)
-      window.location.reload()
+      setPayouts((prev) => {
+        let arr = [...prev];
+        for (let i = 0; i < prev.length; i++) {
+          if (prev[i].timeStamp === timeStamp) {
+            arr.splice(i, 1)
+            break
+          }
+        }
+        if (arr.length === 0) {
+          return [{ empty: true }]
+        } else {
+          return arr
+        }
+      })
     }
   }
 
@@ -64,11 +95,14 @@ const Payout = () => {
         .openCursor().onsuccess = (event) => {
           let cursor = event.target.result
           if (cursor) {
+            console.log(cursor.value)
             setPayouts((prev) => {
-              if (Array.isArray(prev))
-                return [...prev, cursor.value]
-              else
+              if (prev[0].empty) {
                 return [cursor.value]
+              }
+              else {
+                return [...prev, cursor.value]
+              }
             })
             cursor.continue()
           }
@@ -79,13 +113,13 @@ const Payout = () => {
   return (
     <div>
       <div className="payout">
-        <h1>支出列表</h1>
+        <h1 className='title'>支出列表</h1>
         {
-          Array.isArray(payouts) &&
-          <List>
-            {
-              payouts.length === 0 ?
-                <h1>无数据</h1> :
+          payouts[0].empty ?
+            <h3>无数据</h3> :
+            <List>
+              {
+                payouts.length !== 0 &&
                 payouts.map((value, i) => {
                   return (
                     <ListItem onClick={() => {
@@ -97,8 +131,8 @@ const Payout = () => {
                     </ListItem>
                   )
                 })
-            }
-          </List>
+              }
+            </List>
         }
       </div>
       <Fab color="secondary" aria-label="add" onClick={handleAdd}
@@ -118,7 +152,7 @@ const Payout = () => {
             type="number"
             value={money}
             onChange={(e) => {
-              if (e.target.value > 0) setMoney(e.target.value)
+              if (e.target.value >= 0) setMoney(e.target.value)
             }}
             fullWidth
             variant="standard"

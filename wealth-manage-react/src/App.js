@@ -26,7 +26,7 @@ function App() {
   }, [])
   return (
     <div>
-      <h1>开始</h1>
+      <h1 className='start'>开始</h1>
       <div className="App">
         <Card gridCol="1 / 5" gridRow="1 / 3" title="支出管理" icon={<PaidIcon />} handleclick={() => { navigate('/payout') }} />
         <Card gridCol="5 / 9" gridRow="1 / 3" title="收入管理" icon={<AccountBalanceWalletIcon />} handleclick={() => { navigate('/collection') }} />
