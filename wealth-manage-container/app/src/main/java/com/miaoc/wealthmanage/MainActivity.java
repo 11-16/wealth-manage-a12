@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         WebView webview = findViewById(R.id.webview);
         webview.addJavascriptInterface(new JavascriptInterface(this),"Android");
-        webview.loadUrl("http://10.85.15.30:3000");
+        webview.loadUrl("file:android_asset/index.html");
         webview.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
