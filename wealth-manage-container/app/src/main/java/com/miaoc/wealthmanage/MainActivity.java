@@ -7,8 +7,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,18 +20,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        WebView myWebView = findViewById(R.id.webview);
-        myWebView.loadUrl("http://10.85.15.30:3000");
-        myWebView.setWebChromeClient(new WebChromeClient() {
+        WebView webview = findViewById(R.id.webview);
+        webview.addJavascriptInterface(new JavascriptInterface(this),"Android");
+        webview.loadUrl("http://10.85.15.30:3000");
+        webview.setWebViewClient(new WebViewClient() {
             @Override
-            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                Log.d("WealthManage", consoleMessage.message() + " -- From line "
-                        + consoleMessage.lineNumber() + " of "
-                        + consoleMessage.sourceId());
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                System.out.println(request.getUrl());
+                if(request.getUrl().toString().contains("exit")){
+                    finish();
+                }
                 return true;
             }
         });
-        WebSettings webSettings = myWebView.getSettings();
+        WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setDomStorageEnabled(true);

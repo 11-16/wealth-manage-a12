@@ -1,0 +1,18 @@
+.setting {
+  text-align: left;
+}
+.setting h3 {
+  text-align: left;
+  color: white;
+}
+.setting > input {
+  width: 100%;
+  outline: none;
+  font-size: large;
+  color: white;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  background-color: transparent;
+  border-bottom: solid gray;
+}

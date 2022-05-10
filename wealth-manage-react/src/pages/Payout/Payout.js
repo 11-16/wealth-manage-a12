@@ -1,38 +1,45 @@
 import './Payout.css';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Fab, InputLabel, List, ListItem, ListItemButton, ListItemText, MenuItem, Select, TextField } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, ExitToApp, BarChart } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Chart from '../Chart/Chart';
 
 
 const Payout = () => {
   const [open, setOpen] = useState(false)
-  const [money, setMoney] = useState('')
+  const [money, setMoney] = useState(0)
   const [type, setType] = useState('')
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
   const [timeStamp, setTimeStamp] = useState(null)
   const [payouts, setPayouts] = useState([{ empty: true }])
+  const [chart, setChart] = useState(false)
   const [db, setDB] = useState(null)
   const navigate = useNavigate()
+
+  function quit() {
+    navigate(-1)
+  }
 
   function db_put() {
     let request = db.transaction(['payout'], 'readwrite')
       .objectStore('payout')
-      .put({ type, money, date, note, timeStamp })
+      .put({ type, money:Number(money), date, note, timeStamp })
 
     request.onsuccess = () => {
       setOpen(false)
       setPayouts((prev) => {
+        if (prev[0].empty) return [{ type, money:Number(money), date, note, timeStamp }]
         let arr = [...prev], i = 0
         for (; i < prev.length; i++) {
           if (prev[i].timeStamp === timeStamp) {
-            arr.splice(i, 1, { type, money, date, note, timeStamp })
+            arr.splice(i, 1, { type, money:Number(money), date, note, timeStamp })
             break
           }
         }
         if (i === prev.length) {
-          arr.push({ type, money, date, note, timeStamp })
+          arr.push({ type, money:Number(money), date, note, timeStamp })
         }
         return arr
       })
@@ -55,6 +62,10 @@ const Payout = () => {
     setDate('')
     setNote('')
     setTimeStamp(new Date())
+  }
+
+  function handleChart() {
+    setChart(!chart)
   }
 
   function db_delete() {
@@ -95,7 +106,6 @@ const Payout = () => {
         .openCursor().onsuccess = (event) => {
           let cursor = event.target.result
           if (cursor) {
-            console.log(cursor.value)
             setPayouts((prev) => {
               if (prev[0].empty) {
                 return [cursor.value]
@@ -115,33 +125,52 @@ const Payout = () => {
       <div className="payout">
         <h1 className='title'>支出列表</h1>
         {
-          payouts[0].empty ?
-            <h3>无数据</h3> :
-            <List>
-              {
-                payouts.length !== 0 &&
-                payouts.map((value, i) => {
-                  return (
-                    <ListItem onClick={() => {
-                      handleEdit(value)
-                    }} key={i} disablePadding>
-                      <ListItemButton>
-                        <ListItemText primary={`${i} / ${value.type} / ￥${value.money} / ${value.date} / ${value.note}`} />
-                      </ListItemButton>
-                    </ListItem>
-                  )
-                })
-              }
-            </List>
+          chart ? <Chart data={payouts} />
+            :
+            (payouts[0].empty ? <h3>无数据</h3>
+              :
+              <List>
+                {
+                  payouts.length !== 0 &&
+                  payouts.map((value, i) => {
+                    return (
+                      <ListItem onClick={() => {
+                        handleEdit(value)
+                      }} key={i} disablePadding>
+                        <ListItemButton>
+                          <ListItemText primary={`${i} / ${value.type} / ￥${value.money} / ${value.date} / ${value.note}`} />
+                        </ListItemButton>
+                      </ListItem>
+                    )
+                  })
+                }
+              </List>
+            )
         }
       </div>
+      <Fab color="primary" aria-label="diagram" onClick={handleChart}
+        sx={{
+          position: 'fixed',
+          bottom: 172,
+          right: 32
+        }}>
+        <BarChart />
+      </Fab>
       <Fab color="secondary" aria-label="add" onClick={handleAdd}
+        sx={{
+          position: 'fixed',
+          bottom: 102,
+          right: 32
+        }}>
+        <AddIcon />
+      </Fab>
+      <Fab color="default" aria-label="exit" onClick={quit}
         sx={{
           position: 'fixed',
           bottom: 32,
           right: 32
         }}>
-        <AddIcon />
+        <ExitToApp />
       </Fab>
       <Dialog open={open} onClose={() => { setOpen(false) }}>
         <DialogTitle>支出记录</DialogTitle>

@@ -11,7 +11,9 @@ import { useEffect } from 'react';
 
 function App() {
   const navigate = useNavigate()
+
   function quit() {
+    document.location.href = 'exit'
   }
   // 创建数据库，创建数据对象
   useEffect(() => {
